@@ -16,8 +16,6 @@ export function useAudioRecorder(onAudioData: (data: ArrayBuffer) => void) {
     const context = new AudioContext({ sampleRate: SAMPLE_RATE });
     contextRef.current = context;
 
-    console.log("AudioContext sample rate:", context.sampleRate);
-
     // Load worklet for audio processing
     await context.audioWorklet.addModule("/audio-processor.js");
 
@@ -26,7 +24,6 @@ export function useAudioRecorder(onAudioData: (data: ArrayBuffer) => void) {
 
     worklet.port.onmessage = (event) => {
       // event.data is Int16Array from worklet
-      console.log("Audio chunk size:", event.data.length);
       onAudioData(event.data.buffer);
     };
 

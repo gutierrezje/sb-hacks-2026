@@ -40,8 +40,8 @@ class DeepgramHandler:
             model="flux-general-en",
             encoding="linear16",
             sample_rate="16000",
-            eot_threshold="0.7",  # Default confidence threshold
-            eot_timeout_ms="5000",  # Default timeout
+            eot_threshold="0.5",  # Lower threshold - less confident EOT detection
+            eot_timeout_ms="2000",  # Shorter timeout - 2 seconds instead of 5
         )
         self.connection = await self.connection_context.__aenter__()
 
@@ -70,6 +70,8 @@ class DeepgramHandler:
 
             if transcript and self._on_transcript:
                 await self._on_transcript(transcript, is_final)
+            elif not transcript:
+                logger.debug(f"Received empty transcript for event: {message.event}")
 
     def _handle_close(self, *args):
         """Handle connection closed event."""

@@ -113,12 +113,12 @@ Since tools need state, build this first:
 **Deliverable**: Can speak and hear Marcus respond (generic responses, no tools)
 
 ### 1.5 Basic Frontend UI (1 hour)
-- [ ] Create simple layout (two circles for user/Marcus)
-- [ ] Implement microphone access and recording
-- [ ] WebSocket connection to `/ws/negotiate`
-- [ ] Stream audio chunks to backend
-- [ ] Play received audio through `<audio>` element or Web Audio API
-- [ ] Show connection status
+- [x] Create simple layout (two circles for user/Marcus)
+- [x] Implement microphone access and recording
+- [x] WebSocket connection to `/ws/negotiate`
+- [x] Stream audio chunks to backend
+- [x] Play received audio through `<audio>` element or Web Audio API
+- [x] Show connection status
 
 **Deliverable**: Voice round-trip works end-to-end
 
