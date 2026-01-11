@@ -11,6 +11,7 @@ from pathlib import Path
 from core.deepgram_handler import DeepgramHandler
 from core.llm_client import LLMClient
 from core.tts_controller import TTSController
+from core.timing import TimingManager, time_block
 from models.session import NegotiationSession
 from store.sessions import session_store
 
@@ -39,6 +40,8 @@ async def negotiate_websocket(websocket: WebSocket):
     """
     session_id = str(uuid4())
     deepgram_handler = None
+    timing_manager = TimingManager()
+    turn_counter = 0
 
     logger.info(f"New WebSocket connection: {session_id}")
 
@@ -56,6 +59,8 @@ async def negotiate_websocket(websocket: WebSocket):
 
         async def on_transcript(text: str, is_final: bool):
             """Handle transcript and generate LLM response if final."""
+            nonlocal turn_counter
+
             # Send transcript to frontend
             await websocket.send_json({
                 "type": "transcript",
@@ -65,15 +70,44 @@ async def negotiate_websocket(websocket: WebSocket):
 
             # If final transcript, generate LLM response and speak it
             if is_final and text.strip():
-                # Generate LLM response
-                llm_response = await llm.generate_response(
-                    user_message=text,
-                    system_prompt=MARCUS_PROMPT,
+                turn_counter += 1
+                turn_id = f"turn_{turn_counter}"
+
+                # Create metrics for this turn
+                metrics = timing_manager.create_metrics(
+                    session_id=session_id,
+                    turn_id=turn_id,
+                    transcript_length=len(text),
                 )
-                
+
+                # Start overall pipeline timing
+                metrics.start_event("pipeline_total")
+
+                # Generate LLM response
+                async with time_block(metrics, "llm_generation"):
+                    llm_response = await llm.generate_response(
+                        user_message=text,
+                        system_prompt=MARCUS_PROMPT,
+                    )
+
+                # Add response length to metadata
+                metrics.metadata["response_length"] = len(llm_response)
+
                 # Convert to speech and send
-                audio_bytes = await tts.synthesize(llm_response)
-                await websocket.send_bytes(audio_bytes)
+                async with time_block(metrics, "tts_synthesis"):
+                    audio_bytes = await tts.synthesize(llm_response)
+
+                metrics.metadata["audio_bytes"] = len(audio_bytes)
+
+                async with time_block(metrics, "network_send"):
+                    await websocket.send_bytes(audio_bytes)
+
+                # End overall timing and log
+                metrics.end_event("pipeline_total")
+                metrics.log_summary()
+
+                # Cleanup metrics
+                timing_manager.cleanup_metrics(session_id, turn_id)
 
         await deepgram_handler.start_transcription(on_transcript=on_transcript)
 
@@ -102,6 +136,19 @@ async def negotiate_websocket(websocket: WebSocket):
                     text = data.get("text", "Hello, this is a test.")
                     audio_bytes = await tts.synthesize(text)
                     await websocket.send_bytes(audio_bytes)
+                    
+                elif data.get("type") == "test_llm":
+                    # Test full LLM -> TTS pipeline
+                    user_text = data.get("text", "")
+                    if user_text.strip():
+                        llm_response = await llm.generate_response(
+                            user_message=user_text,
+                            system_prompt=MARCUS_PROMPT,
+                        )
+                        audio_bytes = await tts.synthesize(llm_response)
+                        await websocket.send_bytes(audio_bytes)
+                        
+
 
     except WebSocketDisconnect:
         logger.info(f"Client disconnected: {session_id}")

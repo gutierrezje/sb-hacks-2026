@@ -40,6 +40,8 @@ class DeepgramHandler:
             model="flux-general-en",
             encoding="linear16",
             sample_rate="16000",
+            eot_threshold="0.7",  # Default confidence threshold
+            eot_timeout_ms="5000",  # Default timeout
         )
         self.connection = await self.connection_context.__aenter__()
 

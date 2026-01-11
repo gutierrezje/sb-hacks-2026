@@ -48,3 +48,35 @@ class LLMClient:
         )
         
         return response.text
+
+    async def stream_response(self, user_message: str, system_prompt: str | None = None):
+        """Stream response tokens from the LLM.
+        
+        Args:
+            user_message: The user's message
+            system_prompt: Optional system prompt for context
+            
+        Yields:
+            Text chunks as they're generated
+        """
+        messages = []
+        
+        if system_prompt:
+            messages.append({"role": "user", "parts": [{"text": system_prompt}]})
+            messages.append({"role": "model", "parts": [{"text": "Understood."}]})
+        
+        messages.append({"role": "user", "parts": [{"text": user_message}]})
+        
+        config = GenerateContentConfig(
+            temperature=0.7,
+            max_output_tokens=500,
+        )
+        
+        async for chunk in await self.client.aio.models.generate_content_stream(
+            model=self.model,
+            contents=messages,
+            config=config,
+        ):
+            if chunk.text:
+                yield chunk.text
+
