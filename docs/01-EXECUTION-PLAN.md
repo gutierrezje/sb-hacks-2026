@@ -150,15 +150,15 @@ Since tools need state, build this first:
 ### 2.3 LLM Function Calling Loop (2.5 hours)
 This is the hard part - the orchestration engine:
 
-- [ ] Extend `LLMClient` to support tools
-- [ ] Implement the agentic loop:
+- [x] Extend `LLMClient` to support tools
+- [x] Implement the agentic loop:
   1. Call LLM with messages + tools
   2. If tool_calls returned -> execute tools -> append results -> loop back
   3. If text returned -> done, send to TTS
-- [ ] Handle multi-tool calls in one turn
-- [ ] Add max iteration limit (prevent infinite loops)
-- [ ] Stream responses when possible
-- [ ] Load full Marcus system prompt from `prompts/marcus.txt`
+- [x] Handle multi-tool calls in one turn
+- [x] Add max iteration limit (prevent infinite loops)
+- [x] Stream responses when possible
+- [x] Load full Marcus system prompt from `prompts/marcus.txt`
 
 **Deliverable**: Marcus calls tools during conversation
 
