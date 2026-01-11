@@ -15,7 +15,7 @@ export function useWebSocket(url: string) {
   const [conversationHistory, setConversationHistory] = useState<Array<{ speaker: "user" | "marcus", text: string }>>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [marcusEmotion, setMarcusEmotion] = useState<string>("neutral");
-  const [marcusPatience, setMarcusPatience] = useState<number>(100);
+  const [marcusPatience, setMarcusPatience] = useState<number>(50);
   const [marcusCurrentOffer, setMarcusCurrentOffer] = useState<number | null>(null);
 
   function connect() {
