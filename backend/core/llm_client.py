@@ -62,20 +62,26 @@ class LLMClient:
         tools: list[Tool],
         system_prompt: str,
     ) -> Any:
-        """Generate content with tools."""
+        """Generate content with tools optimized for low latency."""
+        # Limit conversation history to last 10 turns to reduce prompt size
+        # Keep first turn (greeting) and last 9 for context
+        limited_contents = contents
+        if len(contents) > 20:  # ~10 turns (user + model pairs)
+            limited_contents = [contents[0]] + contents[-18:]
+
         config = GenerateContentConfig(
-            temperature=0.7,
-            max_output_tokens=500,
+            temperature=0.5,         # Lower for faster, more deterministic responses
+            max_output_tokens=150,   # Marcus keeps responses brief (1-2 sentences)
             system_instruction=system_prompt,
             tools=tools,
         )
-        
+
         response = await self.client.aio.models.generate_content(
             model=self.model,
-            contents=contents,
+            contents=limited_contents,
             config=config,
         )
-        
+
         return response
 
     def get_response_type(self, response: Any) -> tuple[str, Any]:

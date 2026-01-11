@@ -16,12 +16,27 @@ class EmotionalState(str, Enum):
 
 
 class MarcusState(BaseModel):
-    """Marcus's internal state during negotiation."""
+    """Marcus's internal state during negotiation.
+    
+    Respect is a 5-point scale (0-4) that maps to emotional states:
+    - 4: Very impressed (exceptional preparation)
+    - 3: Impressed (good arguments, data-driven)
+    - 2: Neutral (starting state, routine conversation)
+    - 1: Stressed (rambling, unrealistic demands)
+    - 0: Done (respect exhausted, ends negotiation)
+    """
 
-    patience: int = 100
+    respect: int = 2  # Start neutral
     emotional_state: EmotionalState = EmotionalState.NEUTRAL
     budget_ceiling: int = 150_000
     current_offer: int | None = None
+
+    @field_validator("respect")
+    @classmethod
+    def validate_respect(cls, v):
+        if not 0 <= v <= 4:
+            raise ValueError(f"Respect must be 0-4, got {v}")
+        return v
 
     @field_validator("current_offer")
     @classmethod

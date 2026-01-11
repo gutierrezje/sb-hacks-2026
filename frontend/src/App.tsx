@@ -5,7 +5,7 @@ import { useAudioRecorder } from "./hooks/useAudioRecorder";
 const WS_URL = "ws://localhost:8000/ws/negotiate";
 
 function App() {
-  const { status, transcript, marcusEmotion, marcusPatience, marcusCurrentOffer, connect, disconnect, sendAudio } =
+  const { status, transcript, conversationHistory, marcusEmotion, marcusPatience, marcusCurrentOffer, connect, disconnect, sendAudio } =
     useWebSocket(WS_URL);
 
   const { isRecording, start, stop } = useAudioRecorder(sendAudio);
@@ -132,8 +132,8 @@ function App() {
                 isRecording && isConnected && !isTransitioning
                   ? { boxShadow: "0 0 60px 12px rgba(239, 68, 68, 0.5)" }
                   : !isTransitioning && isConnected
-                  ? { boxShadow: "0 0 30px 6px rgba(220, 38, 38, 0.4)" }
-                  : undefined
+                    ? { boxShadow: "0 0 30px 6px rgba(220, 38, 38, 0.4)" }
+                    : undefined
               }
             >
               <div className="relative">
@@ -234,15 +234,34 @@ function App() {
 
       {/* Footer - Status & Transcript */}
       <footer className="border-t border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm">
-        {/* Transcript Display - Always show, even if empty */}
-        <div className="px-6 py-4 border-b border-neutral-800/30 min-h-[60px] flex items-center">
-          {transcript ? (
-            <p className="text-sm text-neutral-200 italic leading-relaxed">
-              "{transcript}"
-            </p>
+        {/* Transcript Display - Conversation History */}
+        <div className="px-6 py-4 border-b border-neutral-800/30 min-h-[120px] max-h-[200px] overflow-y-auto">
+          {conversationHistory.length > 0 ? (
+            <div className="space-y-3">
+              {conversationHistory.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.speaker === "user" ? "justify-start" : "justify-end"}`}>
+                  <div className={`max-w-[70%] px-4 py-2 rounded-lg ${msg.speaker === "user"
+                      ? "bg-red-900/20 border border-red-800/30 text-neutral-200"
+                      : "bg-neutral-800/50 border border-neutral-700/30 text-neutral-300"
+                    }`}>
+                    <div className="text-xs text-neutral-500 mb-1">{msg.speaker === "user" ? "You" : "Marcus"}</div>
+                    <p className="text-sm leading-relaxed">{msg.text}</p>
+                  </div>
+                </div>
+              ))}
+              {/* Show interim transcript if user is speaking */}
+              {transcript && (
+                <div className="flex justify-start">
+                  <div className="max-w-[70%] px-4 py-2 rounded-lg bg-red-900/10 border border-red-800/20 text-neutral-400">
+                    <div className="text-xs text-neutral-500 mb-1">You (speaking...)</div>
+                    <p className="text-sm leading-relaxed italic">{transcript}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
-            <p className="text-sm text-neutral-500 italic">
-              Click the microphone and speak to see transcript...
+            <p className="text-sm text-neutral-500 italic flex items-center justify-center h-full">
+              Click the microphone and speak to start negotiating...
             </p>
           )}
         </div>

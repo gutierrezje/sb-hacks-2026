@@ -43,19 +43,19 @@ TOOL_SCHEMAS: List[Dict[str, Any]] = [
         "name": "adjust_internal_state",
         "description": (
             "Update your internal emotional state based on the conversation. "
-            "Call this frequently (after every user turn) to track how the negotiation affects you. "
+            "Call this when something significant happens to track how the negotiation affects you. "
             "This is PRIVATE - the candidate cannot see this, but it affects your behavior and the emoji avatar shown to them."
         ),
         "parameters": {
             "type": "object",
             "properties": {
-                "patience_delta": {
+                "respect_delta": {
                     "type": "number",
                     "description": (
-                        "Change in patience (-20 to +10). "
-                        "Negative for annoying behavior (rambling, unrealistic demands, rudeness). "
-                        "Positive for good responses (concise, data-driven, professional). "
-                        "Patience starts at 100 and ends negotiation if it drops below 20."
+                        "Change in respect (±1 normally, ±2 for strong reactions). "
+                        "Positive for good arguments (data-driven, professional) - you gain respect for them. "
+                        "Negative for poor behavior (rambling, unrealistic demands) - you lose respect for them. "
+                        "Respect is 0-4 scale: starts at 2 (neutral), ends negotiation at 0."
                     ),
                 },
                 "emotional_state": {
@@ -69,10 +69,9 @@ TOOL_SCHEMAS: List[Dict[str, Any]] = [
                         "done",
                     ],
                     "description": (
-                        "Your current emotional state: "
-                        "neutral (default), impressed (good arguments/data), very_impressed (excellent moves), "
-                        "skeptical (unverified claims), "
-                        "stressed (patience running low or aggressive tactics), done (about to hang up)"
+                        "Your current emotional state (maps to respect level): "
+                        "4=very_impressed (exceptional), 3=impressed (good arguments), 2=neutral/skeptical (routine), "
+                        "1=stressed (problematic), 0=done (exhausted)"
                     ),
                 },
                 "reason": {

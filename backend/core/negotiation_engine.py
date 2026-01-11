@@ -1,7 +1,6 @@
 """Negotiation engine with proper Gemini 3 function calling and thought signature handling."""
 
 import logging
-from typing import AsyncIterator
 from pathlib import Path
 
 from models.session import NegotiationSession
@@ -38,16 +37,19 @@ class NegotiationEngine:
 
     async def process_user_message(self, user_message: str) -> str:
         """Process user input and generate Marcus's response.
-        
-        This implements the agentic loop:
+
+        Single-turn processing:
         1. Add user message to conversation
         2. Call LLM with tools
-        3. If function calls returned → execute → append results → loop back
-        4. If text returned → done
-        
+        3. If function call → execute → call LLM again for response
+        4. Return text response
+
+        This allows Marcus to call ONE tool per turn and build his case
+        naturally over the conversation instead of burning cycles in a loop.
+
         Args:
             user_message: The candidate's message
-            
+
         Returns:
             Marcus's text response
         """
@@ -56,49 +58,46 @@ class NegotiationEngine:
             "role": "user",
             "parts": [{"text": user_message}]
         })
-        
+
         logger.info(f"Processing: {user_message[:100]}...")
-        
-        # Agentic loop
-        max_iterations = 5
-        for iteration in range(max_iterations):
-            logger.info(f"Agentic loop iteration {iteration + 1}/{max_iterations}")
-            
-            # Call LLM
+
+        # First LLM call - may return tool call or text
+        response = await self.llm.generate_with_tools(
+            contents=self.conversation,
+            tools=self.tools,
+            system_prompt=self.system_prompt,
+        )
+
+        # Check response type
+        response_type, data = self.llm.get_response_type(response)
+
+        if response_type == "function_calls":
+            # Execute the function call(s) and get a final response
+            await self._handle_function_calls(response, data)
+
+            # Get final text response after tool execution
+            logger.info("Getting final response after tool execution")
             response = await self.llm.generate_with_tools(
                 contents=self.conversation,
                 tools=self.tools,
                 system_prompt=self.system_prompt,
             )
-            
-            # Check response type
             response_type, data = self.llm.get_response_type(response)
-            
-            if response_type == "text":
-                # We have a text response - we're done!
-                logger.info(f"Marcus: {data}")
-                
-                # Add to conversation history
-                self.conversation.append({
-                    "role": "model",
-                    "parts": [{"text": data}]
-                })
-                
-                return data
-            
-            elif response_type == "function_calls":
-                # Execute function calls and loop back
-                await self._handle_function_calls(response, data)
-                # Continue loop to get final text response
-            
-            else:
-                # Empty or unexpected response
-                logger.warning(f"Unexpected response type: {response_type}")
-                return "I'm having trouble processing that. Could you repeat?"
-        
-        # Max iterations exceeded
-        logger.error(f"Agentic loop exceeded {max_iterations} iterations")
-        return "I need a moment to think about this."
+
+        if response_type == "text":
+            logger.info(f"Marcus: {data}")
+
+            # Add to conversation history
+            self.conversation.append({
+                "role": "model",
+                "parts": [{"text": data}]
+            })
+
+            return data
+
+        # Unexpected response type
+        logger.warning(f"Unexpected response type after tool execution: {response_type}")
+        return "I'm having trouble processing that. Could you repeat?"
 
     async def _handle_function_calls(self, response, function_call_parts: list) -> None:
         """Execute function calls and add results to conversation.

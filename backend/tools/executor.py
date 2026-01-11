@@ -89,27 +89,27 @@ class ToolExecutor:
 
     async def adjust_internal_state(
         self,
-        patience_delta: int = 0,
+        respect_delta: int = 0,
         emotional_state: Optional[str] = None,
         reason: str = ""
     ) -> Dict[str, Any]:
-        """Adjust Marcus's internal state (patience and emotion).
+        """Adjust Marcus's internal state (respect and emotion).
         
         Args:
-            patience_delta: Change in patience (-20 to +10)
+            respect_delta: Change in respect (±1 normally, ±2 for strong reactions)
             emotional_state: New emotional state (must be valid EmotionalState)
             reason: Internal note about why state is being adjusted
             
         Returns:
             Dictionary with old and new state values
         """
-        old_patience = self.session.marcus_state.patience
+        old_respect = self.session.marcus_state.respect
         old_emotion = self.session.marcus_state.emotional_state
         
-        # Update patience with bounds checking
-        new_patience = old_patience + patience_delta
-        new_patience = max(0, min(100, new_patience))  # Clamp to 0-100
-        self.session.marcus_state.patience = new_patience
+        # Update respect with bounds checking (0-4 scale)
+        new_respect = old_respect + respect_delta
+        new_respect = max(0, min(4, new_respect))  # Clamp to 0-4
+        self.session.marcus_state.respect = new_respect
         
         # Update emotional state if provided
         if emotional_state is not None:
@@ -125,9 +125,9 @@ class ToolExecutor:
                 )
         
         return {
-            "old_patience": old_patience,
-            "new_patience": new_patience,
-            "patience_delta": patience_delta,
+            "old_respect": old_respect,
+            "new_respect": new_respect,
+            "respect_delta": respect_delta,
             "old_emotional_state": old_emotion.value,
             "new_emotional_state": self.session.marcus_state.emotional_state.value,
             "reason": reason,
@@ -220,6 +220,6 @@ class ToolExecutor:
             "outcome": outcome,
             "final_offer": final_offer or self.session.marcus_state.current_offer,
             "reason": reason,
-            "final_patience": self.session.marcus_state.patience,
+            "final_respect": self.session.marcus_state.respect,
             "final_emotional_state": self.session.marcus_state.emotional_state.value,
         }
