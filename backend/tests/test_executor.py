@@ -80,62 +80,62 @@ class TestAdjustInternalState:
     """Tests for adjust_internal_state tool."""
 
     @pytest.mark.asyncio
-    async def test_adjust_patience_decrease(self, executor, session):
-        """Test decreasing patience."""
-        initial_patience = session.marcus_state.patience
+    async def test_adjust_respect_decrease(self, executor, session):
+        """Test decreasing respect."""
+        initial_respect = session.marcus_state.respect
         
         result = await executor.adjust_internal_state(
-            patience_delta=-15,
+            respect_delta=-1,
             emotional_state="skeptical",
             reason="Candidate made unrealistic claim"
         )
         
-        assert result["old_patience"] == initial_patience
-        assert result["new_patience"] == initial_patience - 15
-        assert result["patience_delta"] == -15
-        assert session.marcus_state.patience == 85
+        assert result["old_respect"] == initial_respect
+        assert result["new_respect"] == initial_respect - 1
+        assert result["respect_delta"] == -1
+        assert session.marcus_state.respect == 1
 
     @pytest.mark.asyncio
-    async def test_adjust_patience_increase(self, executor, session):
-        """Test increasing patience."""
-        session.marcus_state.patience = 80
+    async def test_adjust_respect_increase(self, executor, session):
+        """Test increasing respect."""
+        session.marcus_state.respect = 1
         
         result = await executor.adjust_internal_state(
-            patience_delta=10,
+            respect_delta=1,
             emotional_state="impressed",
             reason="Candidate provided good data"
         )
         
-        assert result["new_patience"] == 90
-        assert session.marcus_state.patience == 90
+        assert result["new_respect"] == 2
+        assert session.marcus_state.respect == 2
 
     @pytest.mark.asyncio
-    async def test_adjust_patience_lower_bound(self, executor, session):
-        """Test that patience can't go below 0."""
-        session.marcus_state.patience = 10
+    async def test_adjust_respect_lower_bound(self, executor, session):
+        """Test that respect can't go below 0."""
+        session.marcus_state.respect = 1
         
         result = await executor.adjust_internal_state(
-            patience_delta=-50,  # Would go to -40 without clamping
+            respect_delta=-5,  # Would go to -4 without clamping
             emotional_state="done",
-            reason="Lost all patience"
+            reason="Lost all respect"
         )
         
-        assert result["new_patience"] == 0
-        assert session.marcus_state.patience == 0
+        assert result["new_respect"] == 0
+        assert session.marcus_state.respect == 0
 
     @pytest.mark.asyncio
-    async def test_adjust_patience_upper_bound(self, executor, session):
-        """Test that patience can't go above 100."""
-        session.marcus_state.patience = 95
+    async def test_adjust_respect_upper_bound(self, executor, session):
+        """Test that respect can't go above 4."""
+        session.marcus_state.respect = 3
         
         result = await executor.adjust_internal_state(
-            patience_delta=20,  # Would go to 115 without clamping
+            respect_delta=5,  # Would go to 8 without clamping
             emotional_state="very_impressed",
             reason="Excellent negotiation"
         )
         
-        assert result["new_patience"] == 100
-        assert session.marcus_state.patience == 100
+        assert result["new_respect"] == 4
+        assert session.marcus_state.respect == 4
 
     @pytest.mark.asyncio
     async def test_adjust_emotional_state(self, executor, session):
@@ -143,7 +143,7 @@ class TestAdjustInternalState:
         assert session.marcus_state.emotional_state == EmotionalState.NEUTRAL
         
         result = await executor.adjust_internal_state(
-            patience_delta=0,
+            respect_delta=0,
             emotional_state="stressed",
             reason="Candidate being aggressive"
         )
@@ -157,22 +157,22 @@ class TestAdjustInternalState:
         """Test that invalid emotional state raises error."""
         with pytest.raises(ValueError, match="Invalid emotional_state"):
             await executor.adjust_internal_state(
-                patience_delta=0,
+                respect_delta=0,
                 emotional_state="happy",  # Not a valid state
                 reason="Test"
             )
 
     @pytest.mark.asyncio
-    async def test_adjust_patience_only(self, executor, session):
-        """Test adjusting patience without changing emotion."""
+    async def test_adjust_respect_only(self, executor, session):
+        """Test adjusting respect without changing emotion."""
         initial_emotion = session.marcus_state.emotional_state
         
         result = await executor.adjust_internal_state(
-            patience_delta=-10,
+            respect_delta=-1,
             reason="Minor annoyance"
         )
         
-        assert result["new_patience"] == 90
+        assert result["new_respect"] == 1
         assert session.marcus_state.emotional_state == initial_emotion
 
 
@@ -281,15 +281,15 @@ class TestEndNegotiation:
     @pytest.mark.asyncio
     async def test_end_negotiation_hung_up(self, executor, session):
         """Test ending negotiation with hung_up outcome."""
-        session.marcus_state.patience = 0
+        session.marcus_state.respect = 0
         
         result = await executor.end_negotiation(
             outcome="hung_up",
-            reason="Lost patience with rambling"
+            reason="Lost respect with rambling"
         )
         
         assert result["outcome"] == "hung_up"
-        assert result["final_patience"] == 0
+        assert result["final_respect"] == 0
         # hung_up maps to REJECTED in the enum
         assert session.outcome == NegotiationOutcome.REJECTED
 
@@ -306,7 +306,7 @@ class TestEndNegotiation:
     async def test_end_negotiation_includes_final_state(self, executor, session):
         """Test that end result includes final emotional state."""
         session.marcus_state.emotional_state = EmotionalState.STRESSED
-        session.marcus_state.patience = 25
+        session.marcus_state.respect = 1
         
         result = await executor.end_negotiation(
             outcome="accepted",
@@ -314,7 +314,7 @@ class TestEndNegotiation:
             reason="Close call but accepted"
         )
         
-        assert result["final_patience"] == 25
+        assert result["final_respect"] == 1
         assert result["final_emotional_state"] == "stressed"
 
 
