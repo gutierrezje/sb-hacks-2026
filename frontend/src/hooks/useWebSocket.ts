@@ -14,6 +14,7 @@ export function useWebSocket(url: string) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [marcusEmotion, setMarcusEmotion] = useState<string>("neutral");
   const [marcusPatience, setMarcusPatience] = useState<number>(100);
+  const [marcusCurrentOffer, setMarcusCurrentOffer] = useState<number | null>(null);
 
   function connect() {
     if (wsRef.current) return;
@@ -45,6 +46,7 @@ export function useWebSocket(url: string) {
       } else if (data.type === "marcus_state") {
         setMarcusEmotion(data.emotion);
         setMarcusPatience(data.patience);
+        setMarcusCurrentOffer(data.current_offer);
       }
     };
 
@@ -87,5 +89,5 @@ export function useWebSocket(url: string) {
     };
   }, []);
 
-  return { status, transcript, sessionId, marcusEmotion, marcusPatience, connect, disconnect, sendAudio, sendMessage };
+  return { status, transcript, sessionId, marcusEmotion, marcusPatience, marcusCurrentOffer, connect, disconnect, sendAudio, sendMessage };
 }

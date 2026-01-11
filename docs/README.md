@@ -1,4 +1,4 @@
-# The Salary Dojo - Documentation
+# Salary Kombat - Documentation
 
 > A voice-controlled salary negotiation simulator for SB Hacks 2026
 

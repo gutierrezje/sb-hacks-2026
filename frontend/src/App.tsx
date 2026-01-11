@@ -5,7 +5,7 @@ import { useAudioRecorder } from "./hooks/useAudioRecorder";
 const WS_URL = "ws://localhost:8000/ws/negotiate";
 
 function App() {
-  const { status, transcript, marcusEmotion, marcusPatience, connect, disconnect, sendAudio } =
+  const { status, transcript, marcusEmotion, marcusPatience, marcusCurrentOffer, connect, disconnect, sendAudio } =
     useWebSocket(WS_URL);
 
   const { isRecording, start, stop } = useAudioRecorder(sendAudio);
@@ -65,7 +65,7 @@ function App() {
     <div className="h-screen bg-zinc-900 text-white flex flex-col">
       {/* Header */}
       <header className="p-4 border-b border-zinc-800">
-        <h1 className="text-xl font-bold text-center">SALARY DOJO</h1>
+        <h1 className="text-2xl font-bold text-center">SALARY KOMBAT</h1>
       </header>
 
       {/* Split Screen Layout */}
@@ -73,7 +73,23 @@ function App() {
         {/* User Side (Left) */}
         <div className="flex items-center justify-center p-8">
           <div className="flex flex-col items-center">
-            <h2 className="text-lg font-semibold text-zinc-400 mb-12">You</h2>
+            {/* Current Offer Display */}
+            <div className="mb-8">
+              {marcusCurrentOffer ? (
+                <div className="text-center">
+                  <div className="text-sm text-zinc-400 mb-1">Current Offer</div>
+                  <div className="text-2xl font-bold text-green-400">
+                    ${marcusCurrentOffer.toLocaleString()}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="text-sm text-zinc-400">No offer yet</div>
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-lg font-semibold text-zinc-200 mb-12">You</h2>
 
             {/* Recording Button */}
             <button
@@ -142,22 +158,8 @@ function App() {
         {/* AI Side (Right) */}
         <div className="flex items-center justify-center p-8">
           <div className="flex flex-col items-center">
-            <h2 className="text-lg font-semibold text-zinc-400 mb-12">Marcus</h2>
-
-            {/* AI Avatar with Emoji */}
-            <div className="w-32 h-32 rounded-full bg-zinc-800 mb-4 flex items-center justify-center text-6xl transition-transform duration-300 hover:scale-110">
-              {{
-                neutral: '😐',
-                impressed: '😊',
-                very_impressed: '😄',
-                skeptical: '🤨',
-                stressed: '😰',
-                done: '😑',
-              }[marcusEmotion] || '😐'}
-            </div>
-
             {/* Patience Bar */}
-            <div className="w-64 mb-8">
+            <div className="w-64 mb-6">
               <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
                 <div
                   className="h-full transition-all duration-500 ease-out"
@@ -171,9 +173,20 @@ function App() {
                   }}
                 />
               </div>
-              <div className="text-xs text-zinc-500 text-center mt-1">
-                {marcusPatience}% patience
-              </div>
+            </div>
+
+            <h2 className="text-lg font-semibold text-zinc-200 mb-12">Marcus</h2>
+
+            {/* AI Avatar with Emoji */}
+            <div className="w-32 h-32 rounded-full bg-zinc-800 mb-8 flex items-center justify-center text-6xl transition-transform duration-300 hover:scale-110">
+              {{
+                neutral: '😐',
+                impressed: '😊',
+                very_impressed: '😄',
+                skeptical: '🤨',
+                stressed: '😰',
+                done: '😑',
+              }[marcusEmotion] || '😐'}
             </div>
 
             {/* AI Waveform - will animate when AI is speaking */}
@@ -195,18 +208,18 @@ function App() {
         {/* Transcript Display - Always show, even if empty */}
         <div className="px-6 py-3 border-b border-zinc-800 min-h-[60px] flex items-center">
           {transcript ? (
-            <p className="text-sm text-zinc-300 italic">
+            <p className="text-sm text-zinc-200 italic">
               "{transcript}"
             </p>
           ) : (
-            <p className="text-sm text-zinc-600 italic">
+            <p className="text-sm text-zinc-500 italic">
               Click the microphone and speak to see transcript...
             </p>
           )}
         </div>
 
         {/* Status Bar */}
-        <div className="px-6 py-2 flex items-center justify-between text-xs text-zinc-500">
+        <div className="px-6 py-2 flex items-center justify-between text-xs text-zinc-400">
           <div className="flex items-center gap-2">
             <div
               className={`w-2 h-2 rounded-full ${status === "connected"

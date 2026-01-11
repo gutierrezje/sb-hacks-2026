@@ -14,49 +14,49 @@ The Salary Dojo follows a **real-time event-driven architecture** with three pri
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              CLIENT TIER                                     │
+│                              CLIENT TIER                                    │
 │                         React + Vite Web App                                │
-│                                                                              │
+│                                                                             │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                        Presentation Layer                            │   │
+│   │                        Presentation Layer                           │   │
 │   │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │   │
 │   │  │ Negotiation │  │ Marcus      │  │ Transcript  │  │ Results    │  │   │
 │   │  │ Screen      │  │ Avatar      │  │ View        │  │ Screen     │  │   │
 │   │  │             │  │ (Emoji)     │  │             │  │            │  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                         │
+│                                    │                                        │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                         Service Layer                                │   │
+│   │                         Service Layer                               │   │
 │   │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │   │
 │   │  │ AudioService    │  │ WebSocketService│  │ EmojiController     │  │   │
-│   │  │ • Web Audio API │  │ • Connection    │  │ • Emotion display │  │   │
-│   │  │ • Playback      │  │ • Message queue │  │ • Animations      │  │   │
-│   │  │ • Level monitor │  │ • Reconnection  │  │ • Pulse effects   │  │   │
+│   │  │ • Web Audio API │  │ • Connection    │  │ • Emotion display   │  │   │
+│   │  │ • Playback      │  │ • Message queue │  │ • Animations        │  │   │
+│   │  │ • Level monitor │  │ • Reconnection  │  │ • Pulse effects     │  │   │
 │   │  └─────────────────┘  └─────────────────┘  └─────────────────────┘  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                         │
-│                           WebSocket Connection                               │
+│                                    │                                        │
+│                           WebSocket Connection                              │
 │                    (Binary audio + JSON messages)                           │
 └────────────────────────────────────┼────────────────────────────────────────┘
                                      │
                                      │ wss://
                                      │
 ┌────────────────────────────────────┼────────────────────────────────────────┐
-│                              SERVER TIER                                     │
+│                              SERVER TIER                                    │
 │                         Python FastAPI                                      │
-│                                    │                                         │
+│                                    │                                        │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                        Gateway Layer                                 │   │
+│   │                        Gateway Layer                                │   │
 │   │  ┌───────────────────────────────────────────────────────────────┐  │   │
-│   │  │                   WebSocket Handler                            │  │   │
+│   │  │                   WebSocket Handler                           │  │   │
 │   │  │  • Connection lifecycle    • Binary/JSON routing              │  │   │
 │   │  │  • Session binding         • Error handling                   │  │   │
 │   │  └───────────────────────────────────────────────────────────────┘  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                         │
+│                                    │                                        │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                       Processing Layer                               │   │
-│   │                                                                      │   │
+│   │                       Processing Layer                              │   │
+│   │                                                                     │   │
 │   │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │   │
 │   │  │ Audio Pipeline  │  │ Negotiation     │  │ Response Pipeline   │  │   │
 │   │  │                 │  │ Engine          │  │                     │  │   │
@@ -73,20 +73,20 @@ The Salary Dojo follows a **real-time event-driven architecture** with three pri
 │   │  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────┘ │  │   │
 │   │  └─────────────────┘  └─────────────────┘  └─────────────────────┘  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                         │
+│                                    │                                        │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                         Data Layer                                   │   │
+│   │                         Data Layer                                  │   │
 │   │  ┌───────────────────────────────────────────────────────────────┐  │   │
-│   │  │                   Session Store                                │  │   │
+│   │  │                   Session Store                               │  │   │
 │   │  │  dict[session_id: str, NegotiationSession]                    │  │   │
-│   │  │                                                                │  │   │
+│   │  │                                                               │  │   │
 │   │  │  NegotiationSession:                                          │  │   │
 │   │  │    ├── marcus: MarcusState                                    │  │   │
 │   │  │    │     ├── budget_ceiling, patience, stress                 │  │   │
-│   │  │    │     ├── candidate_claims, verified_facts                 │  │   │
+│   │  │    │     ├── candidate_claims, verified_facts                  │  │   │
 │   │  │    │     └── offers_made, emotional_state                     │  │   │
 │   │  │    ├── conversation: list[ConversationTurn]                   │  │   │
-│   │  │    └── outcome, final_salary                                  │  │   │
+│   │  │    └── outcome, final_salary                                   │  │   │
 │   │  └───────────────────────────────────────────────────────────────┘  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 └────────────────────────────────────┼────────────────────────────────────────┘
@@ -97,7 +97,7 @@ The Salary Dojo follows a **real-time event-driven architecture** with three pri
 ┌─────────────────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
 │    EXTERNAL SERVICE     │ │    EXTERNAL SERVICE     │ │    EXTERNAL SERVICE     │
 │                         │ │                         │ │                         │
-│    Deepgram Flux        │ │    Deepgram Aura        │ │    OpenAI / Anthropic   │
+│    Deepgram Flux        │ │    Deepgram Aura        │ │    Gemini               │
 │    (Streaming STT)      │ │    (Streaming TTS)      │ │    (LLM + Tools)        │
 │                         │ │                         │ │                         │
 │  • WebSocket protocol   │ │  • HTTP streaming       │ │  • HTTP streaming       │
