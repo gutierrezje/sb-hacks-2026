@@ -1,10 +1,12 @@
 """WebSocket endpoint for salary negotiation sessions."""
 
+import json
 import logging
 from uuid import uuid4
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from core.deepgram_handler import DeepgramHandler
 from models.session import NegotiationSession
 from store.sessions import session_store
 
@@ -16,84 +18,67 @@ router = APIRouter()
 @router.websocket("/ws/negotiate")
 async def negotiate_websocket(websocket: WebSocket):
     """WebSocket endpoint for real-time salary negotiation.
-    
-    This endpoint handles:
-    - Connection lifecycle management
-    - Session creation and binding
-    - Binary audio data (from client microphone)
-    - JSON control messages (state updates, events)
-    - Bidirectional communication with client
-    
+
     Message Protocol:
         Client -> Server:
             - Binary: PCM audio chunks (16-bit, 16kHz, mono)
-            - JSON: {"type": "control", "action": "..."}
-        
+            - JSON: {"type": "end_session"}
+
         Server -> Client:
-            - Binary: TTS audio chunks
-            - JSON: {"type": "transcript|state|event", "data": {...}}
+            - JSON: {"type": "transcript", "text": "...", "is_final": bool}
     """
     session_id = str(uuid4())
-    
-    logger.info(f"New WebSocket connection attempt: {session_id}")
-    
+    deepgram_handler = None
+
+    logger.info(f"New WebSocket connection: {session_id}")
+
     try:
-        # Accept the WebSocket connection
         await websocket.accept()
-        logger.info(f"WebSocket accepted: {session_id}")
-        
-        # Create new negotiation session
+
+        # Create session
         session = NegotiationSession(session_id=session_id)
         session_store[session_id] = session
-        
-        logger.info(f"Session created: {session_id}")
-        
-        # Send session initialization message
+
+        # Set up Deepgram STT
+        deepgram_handler = DeepgramHandler()
+
+        async def on_transcript(text: str, is_final: bool):
+            """Send transcript to frontend."""
+            await websocket.send_json({
+                "type": "transcript",
+                "text": text,
+                "is_final": is_final,
+            })
+            logger.info(f"Transcript ({'final' if is_final else 'interim'}): {text}")
+
+        await deepgram_handler.start_transcription(on_transcript=on_transcript)
+
+        # Send ready message
         await websocket.send_json({
             "type": "session_init",
             "session_id": session_id,
-            "message": "Connected to Salary Dojo. Ready to negotiate.",
         })
-        
-        # Main message loop
+
+        # Main loop: receive audio and forward to Deepgram
         while True:
-            # Receive message (can be binary or text)
             message = await websocket.receive()
-            
+
             if "bytes" in message:
-                # Binary audio data from client
-                audio_data = message["bytes"]
-                logger.debug(f"Received audio chunk: {len(audio_data)} bytes")
-                
-                # TODO: Process audio through STT pipeline
-                # await audio_pipeline.process_audio(audio_data)
-                
+                await deepgram_handler.send_audio(message["bytes"])
+
             elif "text" in message:
-                # JSON control message
-                import json
                 data = json.loads(message["text"])
-                logger.debug(f"Received control message: {data.get('type')}")
-                
-                # TODO: Handle control messages
-                # - start_recording
-                # - stop_recording
-                # - end_session
-                
-            else:
-                logger.warning(f"Unknown message type received: {message}")
-    
+                if data.get("type") == "end_session":
+                    break
+
     except WebSocketDisconnect:
         logger.info(f"Client disconnected: {session_id}")
-    
+
     except Exception as e:
-        logger.error(f"Error in WebSocket handler: {e}", exc_info=True)
-        try:
-            await websocket.close(code=1011, reason="Internal server error")
-        except Exception:
-            pass
-    
+        logger.error(f"WebSocket error: {e}", exc_info=True)
+
     finally:
-        # Cleanup session
+        if deepgram_handler:
+            await deepgram_handler.close()
         if session_id in session_store:
-            logger.info(f"Cleaning up session: {session_id}")
             del session_store[session_id]
