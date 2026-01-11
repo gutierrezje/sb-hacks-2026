@@ -131,9 +131,9 @@ Since tools need state, build this first:
 **Goal**: Marcus uses tools autonomously and negotiates intelligently.
 
 ### 2.1 Tool Definitions & Mock Data (1 hour)
-- [ ] Create `tools/__init__.py` with 4 tool schemas (OpenAI/Gemini format)
-- [ ] Create `tools/market_data.py` with hardcoded salary data for 10 companies
-- [ ] Keep it simple - just return mock JSON responses
+- [x] Create `tools/__init__.py` with 4 tool schemas (OpenAI/Gemini format)
+- [x] Create `tools/market_data.py` with hardcoded salary data for 10 companies
+- [x] Keep it simple - just return mock JSON responses
 
 **Deliverable**: Tool schemas defined, mock data ready
 

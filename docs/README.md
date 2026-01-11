@@ -1,6 +1,6 @@
 # The Salary Dojo - Documentation
 
-> A voice-controlled salary negotiation simulator for the 24-hour hackathon challenge: "Make Your App Talk Back"
+> A voice-controlled salary negotiation simulator for SB Hacks 2026
 
 ## Quick Links
 
@@ -56,5 +56,3 @@ cd frontend && npm run dev
 ```
 
 ---
-
-*Built for the "Make Your App Talk Back" hackathon challenge*
