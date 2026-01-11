@@ -11,6 +11,7 @@ class NegotiationOutcome(str, Enum):
 
     ACCEPTED = "accepted"
     REJECTED = "rejected"
+    HUNG_UP = "hung_up"
 
 
 class NegotiationSession(BaseModel):

@@ -3,5 +3,5 @@
 from models.session import NegotiationSession
 
 
-# Simple in-memory storage for now, but in production use Redis or similar
+# Simple in-memory storage
 session_store: dict[str, NegotiationSession] = {}
