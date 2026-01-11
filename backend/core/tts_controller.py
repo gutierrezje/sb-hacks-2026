@@ -20,5 +20,14 @@ class TTSController:
         Returns:
             Audio bytes (linear16 PCM at 16kHz)
         """
-        # TODO: implement TTS synthesis
-        pass
+        response = self.client.speak.v1.audio.generate(
+            text=text,
+            model="aura-2-neptune-en",
+        )
+        
+        # Collect all audio chunks from async generator
+        audio_chunks = []
+        async for chunk in response:
+            audio_chunks.append(chunk)
+        
+        return b"".join(audio_chunks)

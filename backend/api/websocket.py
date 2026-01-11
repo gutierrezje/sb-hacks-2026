@@ -7,6 +7,7 @@ from uuid import uuid4
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from core.deepgram_handler import DeepgramHandler
+from core.tts_controller import TTSController
 from models.session import NegotiationSession
 from store.sessions import session_store
 
@@ -23,9 +24,11 @@ async def negotiate_websocket(websocket: WebSocket):
         Client -> Server:
             - Binary: PCM audio chunks (16-bit, 16kHz, mono)
             - JSON: {"type": "end_session"}
+            - JSON: {"type": "test_tts", "text": "..."}
 
         Server -> Client:
             - JSON: {"type": "transcript", "text": "...", "is_final": bool}
+            - Binary: Audio bytes (for TTS responses)
     """
     session_id = str(uuid4())
     deepgram_handler = None
@@ -49,7 +52,6 @@ async def negotiate_websocket(websocket: WebSocket):
                 "text": text,
                 "is_final": is_final,
             })
-            logger.info(f"Transcript ({'final' if is_final else 'interim'}): {text}")
 
         await deepgram_handler.start_transcription(on_transcript=on_transcript)
 
@@ -68,8 +70,16 @@ async def negotiate_websocket(websocket: WebSocket):
 
             elif "text" in message:
                 data = json.loads(message["text"])
+                
                 if data.get("type") == "end_session":
                     break
+                    
+                elif data.get("type") == "test_tts":
+                    # Test TTS with provided text
+                    tts = TTSController()
+                    text = data.get("text", "Hello, this is a test.")
+                    audio_bytes = await tts.synthesize(text)
+                    await websocket.send_bytes(audio_bytes)
 
     except WebSocketDisconnect:
         logger.info(f"Client disconnected: {session_id}")
