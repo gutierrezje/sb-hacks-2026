@@ -6,7 +6,10 @@ from uuid import uuid4
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from pathlib import Path
+
 from core.deepgram_handler import DeepgramHandler
+from core.llm_client import LLMClient
 from core.tts_controller import TTSController
 from models.session import NegotiationSession
 from store.sessions import session_store
@@ -14,6 +17,10 @@ from store.sessions import session_store
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Load Marcus system prompt
+PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "marcus.txt"
+MARCUS_PROMPT = PROMPT_PATH.read_text()
 
 
 @router.websocket("/ws/negotiate")
@@ -42,16 +49,31 @@ async def negotiate_websocket(websocket: WebSocket):
         session = NegotiationSession(session_id=session_id)
         session_store[session_id] = session
 
-        # Set up Deepgram STT
+        # Set up components
         deepgram_handler = DeepgramHandler()
+        llm = LLMClient()
+        tts = TTSController()
 
         async def on_transcript(text: str, is_final: bool):
-            """Send transcript to frontend."""
+            """Handle transcript and generate LLM response if final."""
+            # Send transcript to frontend
             await websocket.send_json({
                 "type": "transcript",
                 "text": text,
                 "is_final": is_final,
             })
+
+            # If final transcript, generate LLM response and speak it
+            if is_final and text.strip():
+                # Generate LLM response
+                llm_response = await llm.generate_response(
+                    user_message=text,
+                    system_prompt=MARCUS_PROMPT,
+                )
+                
+                # Convert to speech and send
+                audio_bytes = await tts.synthesize(llm_response)
+                await websocket.send_bytes(audio_bytes)
 
         await deepgram_handler.start_transcription(on_transcript=on_transcript)
 

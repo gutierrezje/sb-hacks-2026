@@ -104,11 +104,11 @@ Since tools need state, build this first:
 **Deliverable**: Backend can send spoken audio to frontend
 
 ### 1.4 Simple LLM Response (1 hour)
-- [ ] Create `core/llm_client.py` with Gemini 3.0 Flash client
-- [ ] Wire up basic chat (NO tools yet, just conversation)
-- [ ] Use simple Marcus prompt: "You are Marcus, a recruiter. Be brief."
-- [ ] Connect: transcript -> LLM -> TTS -> audio out
-- [ ] Test the full loop
+- [x] Create `core/llm_client.py` with Gemini 3.0 Flash client
+- [x] Wire up basic chat (NO tools yet, just conversation)
+- [x] Use simple Marcus prompt: "You are Marcus, a recruiter. Be brief."
+- [x] Connect: transcript -> LLM -> TTS -> audio out
+- [x] Test the full loop
 
 **Deliverable**: Can speak and hear Marcus respond (generic responses, no tools)
 

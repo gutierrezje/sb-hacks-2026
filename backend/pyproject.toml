@@ -16,6 +16,7 @@ dependencies = [
     "anthropic>=0.40.0",
     "deepgram-sdk>=3.8.0",
     "aiohttp>=3.11.0",
+    "google-genai>=1.57.0",
 ]
 
 
@@ -30,6 +31,9 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning:google.genai._api_client",
+]
 
 [dependency-groups]
 dev = [
