@@ -1,12 +1,22 @@
 """Session models for negotiation state."""
 
-from dataclasses import dataclass, field
-from datetime import datetime
+from enum import Enum
+from pydantic import BaseModel, Field
+
+from models.state import MarcusState
 
 
-@dataclass
-class NegotiationSession:
+class NegotiationOutcome(str, Enum):
+    """Final outcome of negotiation."""
+
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+
+
+class NegotiationSession(BaseModel):
     """Active negotiation session state."""
-    
+
     session_id: str
-    started_at: datetime = field(default_factory=datetime.utcnow)
+    marcus_state: MarcusState = Field(default_factory=MarcusState)
+    conversation_history: list[dict] = Field(default_factory=list)
+    outcome: NegotiationOutcome | None = None
