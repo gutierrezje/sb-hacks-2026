@@ -23,6 +23,16 @@ export function useWebSocket(url: string) {
     };
 
     ws.onmessage = (event) => {
+      // Handle binary audio data
+      if (event.data instanceof Blob) {
+        const audioBlob = event.data;
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play();
+        return;
+      }
+
+      // Handle JSON messages
       const data: WebSocketMessage = JSON.parse(event.data);
 
       if (data.type === "session_init") {
@@ -59,11 +69,17 @@ export function useWebSocket(url: string) {
     }
   }
 
+  function sendMessage(message: object) {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(message));
+    }
+  }
+
   useEffect(() => {
     return () => {
       wsRef.current?.close();
     };
   }, []);
 
-  return { status, transcript, sessionId, connect, disconnect, sendAudio };
+  return { status, transcript, sessionId, connect, disconnect, sendAudio, sendMessage };
 }

@@ -90,16 +90,16 @@ Since tools need state, build this first:
 - [x] Handle interim vs final transcripts
 - [x] Implement `utterance_end` detection for turn-taking
 - [x] Wire into existing `/ws/negotiate` endpoint
-- [ ] Test with audio from frontend (even if TTS not ready yet)
+- [x] Test with audio from frontend (even if TTS not ready yet)
 
 **Deliverable**: Can see transcript appear in backend logs
 
 ### 1.3 Deepgram TTS Integration (1.5 hours)
-- [ ] Create `core/tts_controller.py`
-- [ ] Implement text -> streaming audio via Deepgram Aura
-- [ ] Handle chunked audio response
-- [ ] Send audio chunks back through WebSocket
-- [ ] Test with hardcoded text first
+- [x] Create `core/tts_controller.py`
+- [x] Implement text -> streaming audio via Deepgram Aura
+- [x] Handle chunked audio response
+- [x] Send audio chunks back through WebSocket
+- [x] Test with hardcoded text first
 
 **Deliverable**: Backend can send spoken audio to frontend
 
