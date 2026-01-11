@@ -1,7 +1,12 @@
 """Salary Dojo - FastAPI Backend."""
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Configure logging to show INFO level
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
     title="Salary Dojo",

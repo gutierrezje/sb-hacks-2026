@@ -39,7 +39,7 @@ class DeepgramHandler:
         self.connection_context = self.client.listen.v2.connect(
             model="flux-general-en",
             encoding="linear16",
-            sample_rate=16000,
+            sample_rate="16000",
         )
         self.connection = await self.connection_context.__aenter__()
 
@@ -58,6 +58,8 @@ class DeepgramHandler:
 
     async def _handle_message(self, message):
         """Handle messages from Deepgram Flux v2."""
+        logger.info(f"Deepgram message: {type(message).__name__}")
+
         if isinstance(message, ListenV2Connected):
             logger.info(f"Deepgram connected: request_id={message.request_id}")
             return
@@ -65,6 +67,7 @@ class DeepgramHandler:
         if isinstance(message, ListenV2TurnInfo):
             transcript = message.transcript
             is_final = message.event == "EndOfTurn"
+            logger.info(f"TurnInfo event={message.event} transcript='{transcript}'")
 
             if transcript and self._on_transcript:
                 await self._on_transcript(transcript, is_final)
@@ -82,6 +85,7 @@ class DeepgramHandler:
     async def send_audio(self, audio_data: bytes):
         """Send audio bytes to Deepgram for transcription."""
         if self.connection:
+            logger.debug(f"Sending {len(audio_data)} bytes to Deepgram")
             await self.connection.send_media(audio_data)
 
     async def close(self):
