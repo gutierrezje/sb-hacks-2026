@@ -65,9 +65,17 @@ export function useWebSocket(url: string) {
 
   function disconnect() {
     if (wsRef.current) {
-      wsRef.current.send(JSON.stringify({ type: "end_session" }));
-      wsRef.current.close();
-      wsRef.current = null;
+      try {
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: "end_session" }));
+        }
+        wsRef.current.close();
+      } catch (error) {
+        console.error('Error disconnecting WebSocket:', error);
+      } finally {
+        wsRef.current = null;
+        setStatus("disconnected");
+      }
     }
   }
 

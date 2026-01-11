@@ -40,75 +40,99 @@ function App() {
   useEffect(() => {
     connect();
     return () => disconnect();
-  }, [connect, disconnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Toggle recording with optimistic UI
   const handleRecordingClick = async () => {
-    if (!isConnected || isTransitioning) return;
+    console.log('Button clicked - isConnected:', isConnected, 'isTransitioning:', isTransitioning, 'isRecording:', isRecording);
+
+    if (!isConnected) {
+      console.warn('Cannot record: WebSocket not connected');
+      return;
+    }
+
+    if (isTransitioning) {
+      console.warn('Cannot record: Already transitioning');
+      return;
+    }
 
     setIsTransitioning(true);
 
     try {
       if (isRecording) {
+        console.log('Stopping recording...');
         // Wait a moment for any final audio to be sent before stopping
         await new Promise(resolve => setTimeout(resolve, 500));
         stop();
       } else {
+        console.log('Starting recording...');
         await start();
       }
+    } catch (error) {
+      console.error('Error toggling recording:', error);
+      // Reset state on error
+      stop();
+      alert('Microphone error. Please refresh the page and try again.');
     } finally {
+      console.log('Transition complete');
       setIsTransitioning(false);
     }
   };
 
   return (
-    <div className="h-screen bg-zinc-900 text-white flex flex-col">
+    <div className="h-screen bg-neutral-950 text-white flex flex-col">
       {/* Header */}
-      <header className="p-4 border-b border-zinc-800">
-        <h1 className="text-2xl font-bold text-center">SALARY KOMBAT</h1>
+      <header className="p-6 border-b border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm">
+        <h1 className="text-3xl font-black text-center tracking-[0.3em] text-red-500 uppercase" style={{ fontFamily: 'Impact, "Arial Black", sans-serif', textShadow: '2px 2px 0px rgba(0,0,0,0.5), 0 0 10px rgba(239, 68, 68, 0.3)' }}>
+          SALARY KOMBAT
+        </h1>
       </header>
 
       {/* Split Screen Layout */}
-      <div className="flex-1 grid grid-cols-2 divide-x divide-zinc-800">
+      <div className="flex-1 grid grid-cols-2 divide-x divide-red-900/30">
         {/* User Side (Left) */}
         <div className="flex items-center justify-center p-8">
           <div className="flex flex-col items-center">
             {/* Current Offer Display */}
             <div className="mb-8">
               {marcusCurrentOffer ? (
-                <div className="text-center">
-                  <div className="text-sm text-zinc-400 mb-1">Current Offer</div>
-                  <div className="text-2xl font-bold text-green-400">
+                <div className="text-center px-6 py-3 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20">
+                  <div className="text-xs text-emerald-300/60 mb-1 uppercase tracking-wide">Current Offer</div>
+                  <div className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent">
                     ${marcusCurrentOffer.toLocaleString()}
                   </div>
                 </div>
               ) : (
-                <div className="text-center">
-                  <div className="text-sm text-zinc-400">No offer yet</div>
+                <div className="text-center px-6 py-3 rounded-xl bg-neutral-800/30 border border-neutral-700/30">
+                  <div className="text-sm text-neutral-400">No offer yet</div>
                 </div>
               )}
             </div>
 
-            <h2 className="text-lg font-semibold text-zinc-200 mb-12">You</h2>
+            <h2 className="text-lg font-semibold text-neutral-200 mb-12">You</h2>
 
             {/* Recording Button */}
             <button
               onClick={handleRecordingClick}
               disabled={!isConnected || isTransitioning}
               className={`
-                w-32 h-32 rounded-full mb-8
-                transition-all duration-150 ease-out
+                w-36 h-36 rounded-full mb-8
+                transition-all duration-200 ease-out
                 flex items-center justify-center
+                border-2
                 ${!isConnected || isTransitioning
-                  ? "bg-zinc-800 cursor-not-allowed opacity-50"
+                  ? "bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-50"
                   : isRecording
-                    ? "bg-red-600 hover:bg-red-700 scale-110"
-                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer active:scale-95"
+                    ? "bg-gradient-to-br from-red-500 to-red-600 border-red-400/50 hover:from-red-600 hover:to-red-700 scale-110"
+                    : "bg-gradient-to-br from-red-600 to-orange-600 border-red-500/50 hover:from-red-700 hover:to-orange-700 cursor-pointer active:scale-95"
                 }
               `}
               style={
                 isRecording && isConnected && !isTransitioning
-                  ? { boxShadow: "0 0 40px 8px rgba(220, 38, 38, 0.6)" }
+                  ? { boxShadow: "0 0 60px 12px rgba(239, 68, 68, 0.5)" }
+                  : !isTransitioning && isConnected
+                  ? { boxShadow: "0 0 30px 6px rgba(220, 38, 38, 0.4)" }
                   : undefined
               }
             >
@@ -142,11 +166,11 @@ function App() {
             </button>
 
             {/* User Waveform */}
-            <div className="h-16 w-64 flex items-center justify-center gap-1">
+            <div className="h-20 w-64 flex items-center justify-center gap-1">
               {waveformHeights.map((height, i) => (
                 <div
                   key={i}
-                  className={`w-1 rounded-full transition-all duration-150 ${isRecording ? "bg-blue-500" : "bg-zinc-700"
+                  className={`w-1.5 rounded-full transition-all duration-150 ${isRecording ? "bg-gradient-to-t from-red-500 to-orange-400 shadow-lg shadow-red-500/50" : "bg-neutral-700/50"
                     }`}
                   style={{ height: `${height}%` }}
                 />
@@ -160,25 +184,30 @@ function App() {
           <div className="flex flex-col items-center">
             {/* Patience Bar */}
             <div className="w-64 mb-6">
-              <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-5 bg-neutral-800/50 rounded-full overflow-hidden border border-neutral-700/30 shadow-inner">
                 <div
-                  className="h-full transition-all duration-500 ease-out"
+                  className="h-full transition-all duration-500 ease-out shadow-lg"
                   style={{
                     width: `${marcusPatience}%`,
                     background: marcusPatience > 66
                       ? 'linear-gradient(90deg, #10b981, #34d399)'
                       : marcusPatience > 33
                         ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
-                        : 'linear-gradient(90deg, #ef4444, #f87171)'
+                        : 'linear-gradient(90deg, #ef4444, #f87171)',
+                    boxShadow: marcusPatience > 66
+                      ? '0 0 20px rgba(16, 185, 129, 0.6)'
+                      : marcusPatience > 33
+                        ? '0 0 20px rgba(245, 158, 11, 0.6)'
+                        : '0 0 20px rgba(239, 68, 68, 0.6)'
                   }}
                 />
               </div>
             </div>
 
-            <h2 className="text-lg font-semibold text-zinc-200 mb-12">Marcus</h2>
+            <h2 className="text-lg font-semibold text-neutral-200 mb-12">Marcus</h2>
 
             {/* AI Avatar with Emoji */}
-            <div className="w-32 h-32 rounded-full bg-zinc-800 mb-8 flex items-center justify-center text-6xl transition-transform duration-300 hover:scale-110">
+            <div className="w-36 h-36 rounded-full bg-gradient-to-br from-neutral-800 to-neutral-900 border-2 border-red-900/40 mb-8 flex items-center justify-center text-7xl transition-transform duration-300 hover:scale-110 shadow-xl shadow-red-950/30">
               {{
                 neutral: '😐',
                 impressed: '😊',
@@ -190,11 +219,11 @@ function App() {
             </div>
 
             {/* AI Waveform - will animate when AI is speaking */}
-            <div className="h-16 w-64 flex items-center justify-center gap-1">
+            <div className="h-20 w-64 flex items-center justify-center gap-1">
               {Array.from({ length: 20 }).map((_, i) => (
                 <div
                   key={i}
-                  className="w-1 bg-zinc-700 rounded-full transition-all duration-150"
+                  className="w-1.5 bg-neutral-700/50 rounded-full transition-all duration-150"
                   style={{ height: "20%" }}
                 />
               ))}
@@ -204,22 +233,22 @@ function App() {
       </div>
 
       {/* Footer - Status & Transcript */}
-      <footer className="border-t border-zinc-800 bg-zinc-900">
+      <footer className="border-t border-neutral-800/50 bg-neutral-900/50 backdrop-blur-sm">
         {/* Transcript Display - Always show, even if empty */}
-        <div className="px-6 py-3 border-b border-zinc-800 min-h-[60px] flex items-center">
+        <div className="px-6 py-4 border-b border-neutral-800/30 min-h-[60px] flex items-center">
           {transcript ? (
-            <p className="text-sm text-zinc-200 italic">
+            <p className="text-sm text-neutral-200 italic leading-relaxed">
               "{transcript}"
             </p>
           ) : (
-            <p className="text-sm text-zinc-500 italic">
+            <p className="text-sm text-neutral-500 italic">
               Click the microphone and speak to see transcript...
             </p>
           )}
         </div>
 
         {/* Status Bar */}
-        <div className="px-6 py-2 flex items-center justify-between text-xs text-zinc-400">
+        <div className="px-6 py-2 flex items-center justify-between text-xs text-neutral-400">
           <div className="flex items-center gap-2">
             <div
               className={`w-2 h-2 rounded-full ${status === "connected"
