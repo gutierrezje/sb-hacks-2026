@@ -5,7 +5,7 @@ import { useAudioRecorder } from "./hooks/useAudioRecorder";
 const WS_URL = "ws://localhost:8000/ws/negotiate";
 
 function App() {
-  const { status, transcript, connect, disconnect, sendAudio } =
+  const { status, transcript, marcusEmotion, marcusPatience, connect, disconnect, sendAudio } =
     useWebSocket(WS_URL);
 
   const { isRecording, start, stop } = useAudioRecorder(sendAudio);
@@ -13,6 +13,8 @@ function App() {
   const [waveformHeights, setWaveformHeights] = useState<number[]>(
     Array(20).fill(20)
   );
+
+
 
   const isConnected = status === "connected";
 
@@ -81,12 +83,11 @@ function App() {
                 w-32 h-32 rounded-full mb-8
                 transition-all duration-150 ease-out
                 flex items-center justify-center
-                ${
-                  !isConnected || isTransitioning
-                    ? "bg-zinc-800 cursor-not-allowed opacity-50"
-                    : isRecording
-                      ? "bg-red-600 hover:bg-red-700 scale-110"
-                      : "bg-blue-600 hover:bg-blue-700 cursor-pointer active:scale-95"
+                ${!isConnected || isTransitioning
+                  ? "bg-zinc-800 cursor-not-allowed opacity-50"
+                  : isRecording
+                    ? "bg-red-600 hover:bg-red-700 scale-110"
+                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer active:scale-95"
                 }
               `}
               style={
@@ -129,9 +130,8 @@ function App() {
               {waveformHeights.map((height, i) => (
                 <div
                   key={i}
-                  className={`w-1 rounded-full transition-all duration-150 ${
-                    isRecording ? "bg-blue-500" : "bg-zinc-700"
-                  }`}
+                  className={`w-1 rounded-full transition-all duration-150 ${isRecording ? "bg-blue-500" : "bg-zinc-700"
+                    }`}
                   style={{ height: `${height}%` }}
                 />
               ))}
@@ -144,9 +144,36 @@ function App() {
           <div className="flex flex-col items-center">
             <h2 className="text-lg font-semibold text-zinc-400 mb-12">Marcus</h2>
 
-            {/* AI Avatar */}
-            <div className="w-32 h-32 rounded-full bg-zinc-800 mb-8 flex items-center justify-center text-6xl">
-              😐
+            {/* AI Avatar with Emoji */}
+            <div className="w-32 h-32 rounded-full bg-zinc-800 mb-4 flex items-center justify-center text-6xl transition-transform duration-300 hover:scale-110">
+              {{
+                neutral: '😐',
+                impressed: '😊',
+                very_impressed: '😄',
+                skeptical: '🤨',
+                stressed: '😰',
+                done: '😑',
+              }[marcusEmotion] || '😐'}
+            </div>
+
+            {/* Patience Bar */}
+            <div className="w-64 mb-8">
+              <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${marcusPatience}%`,
+                    background: marcusPatience > 66
+                      ? 'linear-gradient(90deg, #10b981, #34d399)'
+                      : marcusPatience > 33
+                        ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
+                        : 'linear-gradient(90deg, #ef4444, #f87171)'
+                  }}
+                />
+              </div>
+              <div className="text-xs text-zinc-500 text-center mt-1">
+                {marcusPatience}% patience
+              </div>
             </div>
 
             {/* AI Waveform - will animate when AI is speaking */}
@@ -182,13 +209,12 @@ function App() {
         <div className="px-6 py-2 flex items-center justify-between text-xs text-zinc-500">
           <div className="flex items-center gap-2">
             <div
-              className={`w-2 h-2 rounded-full ${
-                status === "connected"
-                  ? "bg-green-500"
-                  : status === "connecting"
-                    ? "bg-yellow-500 animate-pulse"
-                    : "bg-red-500"
-              }`}
+              className={`w-2 h-2 rounded-full ${status === "connected"
+                ? "bg-green-500"
+                : status === "connecting"
+                  ? "bg-yellow-500 animate-pulse"
+                  : "bg-red-500"
+                }`}
             />
             <span>
               {status === "connected"

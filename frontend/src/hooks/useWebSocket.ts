@@ -2,7 +2,8 @@ import { useRef, useState, useEffect } from "react";
 
 type WebSocketMessage =
   | { type: "session_init"; session_id: string }
-  | { type: "transcript"; text: string; is_final: boolean };
+  | { type: "transcript"; text: string; is_final: boolean }
+  | { type: "marcus_state"; patience: number; emotion: string; current_offer: number | null; outcome: string | null };
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
@@ -11,6 +12,8 @@ export function useWebSocket(url: string) {
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [transcript, setTranscript] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [marcusEmotion, setMarcusEmotion] = useState<string>("neutral");
+  const [marcusPatience, setMarcusPatience] = useState<number>(100);
 
   function connect() {
     if (wsRef.current) return;
@@ -39,6 +42,9 @@ export function useWebSocket(url: string) {
         setSessionId(data.session_id);
       } else if (data.type === "transcript") {
         setTranscript(data.text);
+      } else if (data.type === "marcus_state") {
+        setMarcusEmotion(data.emotion);
+        setMarcusPatience(data.patience);
       }
     };
 
@@ -81,5 +87,5 @@ export function useWebSocket(url: string) {
     };
   }, []);
 
-  return { status, transcript, sessionId, connect, disconnect, sendAudio, sendMessage };
+  return { status, transcript, sessionId, marcusEmotion, marcusPatience, connect, disconnect, sendAudio, sendMessage };
 }

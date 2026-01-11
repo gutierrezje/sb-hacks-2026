@@ -44,7 +44,7 @@ The Salary Dojo is a real-time voice-based negotiation training application wher
 │  │  • event (json) - Visual/avatar triggers                         │  │
 │  │  • control (json) - Session management                           │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────────┘
           │
           ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -70,12 +70,12 @@ The Salary Dojo is a real-time voice-based negotiation training application wher
 │                              │                                          │
 │                              ▼                                          │
 │  ┌────────────────────────────────────────────────────────────────┐     │
-│  │                      SESSION STORE                             │    │
-│  │  In-Memory (dict[session_id, NegotiationSession])              │    │
-│  │  • Marcus state (budget, patience, stress, offers)             │    │
-│  │  • Conversation history                                        │    │
-│  │  • Candidate claims & verified facts                            │    │
-│  └────────────────────────────────────────────────────────────────┘    │
+│  │                      SESSION STORE                             │     │
+│  │  In-Memory (dict[session_id, NegotiationSession])              │     │
+│  │  • Marcus state (budget, patience, stress, offers)             │     │
+│  │  • Conversation history                                        │     │
+│  │  • Candidate claims & verified facts                            │     │
+│  └────────────────────────────────────────────────────────────────┘     │
 └─────────────────────────────────────────────────────────────────────────┘
           │                              │
           ▼                              ▼
@@ -705,30 +705,30 @@ INTRODUCTION ──────────────────────�
 DISCOVERY ─────────────────────────────────────────────────┤
 │                                                          │
 │ Marcus learns about candidate                            │
-│ Claims are recorded and verified                         │
+│ Claims are recorded and verified                          │
 │ Tools: record_candidate_claim, check_market_rate         │
 ▼                                                          │
 INITIAL_OFFER ─────────────────────────────────────────────┤
 │                                                          │
-│ Marcus makes first offer ($95k)                          │
-│ Tool: make_offer(is_final=false)                         │
+│ Marcus makes first offer ($95k)                           │
+│ Tool: make_offer(is_final=false)                          │
 ▼                                                          │
 NEGOTIATION ───────────────────────────────────────────────┤
 │ ┌──────────────────────────────────────────────────────┐ │
-│ │ Loop:                                                 │ │
+│ │ Loop:                                                │ │
 │ │ • User makes counter-offer                           │ │
 │ │ • Marcus evaluates (check_market_rate, adjust_state) │ │
 │ │ • Marcus responds (make_offer or pushback)           │ │
 │ │ • Exit conditions:                                   │ │
-│ │   - patience <= 0 → CONCLUDED (hung_up)             │ │
-│ │   - rounds > 5 → FINAL_OFFER                        │ │
-│ │   - agreement reached → CONCLUDED (accepted)        │ │
+│ │   - patience <= 0 → CONCLUDED (hung_up)              │ │
+│ │   - rounds > 5 → FINAL_OFFER                         │ │
+│ │   - agreement reached → CONCLUDED (accepted)         │ │
 │ └──────────────────────────────────────────────────────┘ │
 ▼                                                          │
 FINAL_OFFER ───────────────────────────────────────────────┤
 │                                                          │
-│ Marcus: "This is my final offer"                         │
-│ Tool: make_offer(is_final=true)                          │
+│ Marcus: "This is my final offer"                          │
+│ Tool: make_offer(is_final=true)                           │
 │ User must accept or reject                               │
 ▼                                                          │
 CONCLUDED ─────────────────────────────────────────────────┘

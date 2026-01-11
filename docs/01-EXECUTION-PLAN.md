@@ -163,11 +163,11 @@ This is the hard part - the orchestration engine:
 **Deliverable**: Marcus calls tools during conversation
 
 ### 2.4 Integration & Testing (1 hour)
-- [ ] Test: "I have an offer from Google at $200k" -> triggers market check
-- [ ] Test: Rambling -> patience decreases
-- [ ] Test: Good argument -> Marcus makes counter-offer
-- [ ] Test: Low patience -> Marcus ends negotiation
-- [ ] Fix any bugs in the loop
+- [x] Test: "I have an offer from Google at $200k" -> triggers market check
+- [x] Test: Rambling -> patience decreases
+- [x] Test: Good argument -> Marcus makes counter-offer
+- [x] Test: Low patience -> Marcus ends negotiation
+- [x] Fix any bugs in the loop
 
 **Deliverable**: Full negotiation possible, tools work correctly
 

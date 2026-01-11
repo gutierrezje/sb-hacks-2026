@@ -12,6 +12,7 @@ from core.deepgram_handler import DeepgramHandler
 from core.llm_client import LLMClient
 from core.tts_controller import TTSController
 from core.timing import TimingManager, time_block
+from core.negotiation_engine import NegotiationEngine
 from models.session import NegotiationSession
 from store.sessions import session_store
 
@@ -54,8 +55,10 @@ async def negotiate_websocket(websocket: WebSocket):
 
         # Set up components
         deepgram_handler = DeepgramHandler()
-        llm = LLMClient()
         tts = TTSController()
+        
+        # Create NegotiationEngine for this session
+        engine = NegotiationEngine(session)
 
         async def on_transcript(text: str, is_final: bool):
             """Handle transcript and generate LLM response if final."""
@@ -83,12 +86,19 @@ async def negotiate_websocket(websocket: WebSocket):
                 # Start overall pipeline timing
                 metrics.start_event("pipeline_total")
 
-                # Generate LLM response
+                # Generate LLM response using NegotiationEngine
+                # This will autonomously call tools as needed
                 async with time_block(metrics, "llm_generation"):
-                    llm_response = await llm.generate_response(
-                        user_message=text,
-                        system_prompt=MARCUS_PROMPT,
-                    )
+                    llm_response = await engine.process_user_message(text)
+
+                # Send Marcus's state to frontend
+                await websocket.send_json({
+                    "type": "marcus_state",
+                    "patience": session.marcus_state.patience,
+                    "emotion": session.marcus_state.emotional_state.value,
+                    "current_offer": session.marcus_state.current_offer,
+                    "outcome": session.outcome.value if session.outcome else None,
+                })
 
                 # Add response length to metadata
                 metrics.metadata["response_length"] = len(llm_response)
