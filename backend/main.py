@@ -25,6 +25,6 @@ async def health():
     return {"status": "ok"}
 
 
-# WebSocket endpoint will be added here
-# from api.websocket import router as ws_router
-# app.include_router(ws_router)
+# WebSocket endpoint
+from api.websocket import router as ws_router
+app.include_router(ws_router)

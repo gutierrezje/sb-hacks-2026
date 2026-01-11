@@ -12,8 +12,6 @@ Run with:
 import pytest
 from deepgram import DeepgramClient
 
-from config import get_settings
-
 
 # Test configuration
 SAMPLE_AUDIO_URL = "https://static.deepgram.com/examples/Bueller-Life-moves-pretty-fast.wav"
@@ -23,6 +21,8 @@ SAMPLE_TTS_TEXT = "Hello! This is a test of Deepgram's text to speech API."
 @pytest.fixture(scope="module")
 def deepgram_client():
     """Provide a configured Deepgram client for all tests."""
+    from config import get_settings
+    
     settings = get_settings()
     return DeepgramClient(api_key=settings.deepgram_api_key)
 
