@@ -57,9 +57,7 @@ Marcus's avatar warps between emojis based on his emotional state:
 | Impressed | 😊 | Good arguments, market data cited |
 | Very Impressed | 😄 | Excellent negotiation moves |
 | Skeptical | 🤨 | Unverified claims |
-| Annoyed | 😒 | Rambling, repetition |
-| Stressed | 😰 | Aggressive tactics, high demands |
-| Frustrated | 😤 | Patience running low |
+| Stressed | 😰 | Aggressive tactics, patience running low |
 | Done | 😑 | About to hang up |
 
 ### Audio Visualizer
@@ -215,7 +213,7 @@ This is the hard part - the orchestration engine:
 - [ ] Create post-negotiation summary component
 - [ ] Calculate score: `(final_offer / budget_ceiling) * 100`
 - [ ] Show letter grade (A: 90%+, B: 80-89%, C: 70-79%, F: <70% or hung up)
-- [ ] Display key moments (what impressed/annoyed Marcus)
+- [ ] Display key moments (what impressed/stressed Marcus)
 - [ ] "Try Again" button to reset
 
 **Deliverable**: Satisfying ending experience
@@ -244,10 +242,9 @@ This is the hard part - the orchestration engine:
 ## Stretch Goals (If Time Permits)
 
 1. **Transcript panel** - Show real-time transcript of conversation
-2. **Simple Three.js avatar** - Low-poly 3D face instead of emoji
-3. **Marcus interrupts user** - After excessive rambling (10+ seconds)
-4. **Hint system** - Suggest good responses during practice mode
-5. **Voice emotion** - Adjust Deepgram Aura parameters based on Marcus's stress
+2. **Marcus interrupts user** - After excessive rambling (10+ seconds)
+3. **Hint system** - Suggest good responses during practice mode
+4. **Voice emotion** - Adjust Deepgram Aura parameters based on Marcus's stress
 
 ---
 
@@ -316,7 +313,7 @@ Update Marcus's hidden state. LLM should call this frequently.
       },
       "emotional_state": {
         "type": "string",
-        "enum": ["neutral", "impressed", "very_impressed", "skeptical", "annoyed", "stressed", "frustrated", "done"],
+        "enum": ["neutral", "impressed", "very_impressed", "skeptical", "stressed", "done"],
         "description": "Your current emotional state"
       },
       "reason": {

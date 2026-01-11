@@ -10,7 +10,7 @@
 | [02-SYSTEM-DESIGN.md](./02-SYSTEM-DESIGN.md) | Technical system design and component specifications |
 | [03-ARCHITECTURE.md](./03-ARCHITECTURE.md) | Detailed architecture, module structure, and protocols |
 | [04-MARCUS-PERSONALITY.md](./04-MARCUS-PERSONALITY.md) | AI character design, prompts, and behavior patterns |
-| [05-THREEJS-AVATAR.md](./05-THREEJS-AVATAR.md) | 3D avatar design with expressions, lip sync, and effects |
+| [05-THREEJS-AVATAR-STRETCH.md](./05-THREEJS-AVATAR-STRETCH.md) | (STRETCH GOAL) 3D avatar design - not implemented, using emojis |
 
 ## Project Overview
 

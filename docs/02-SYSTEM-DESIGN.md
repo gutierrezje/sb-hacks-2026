@@ -19,62 +19,62 @@ The Salary Dojo is a real-time voice-based negotiation training application wher
 ### 1.3 High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           CLIENT LAYER                                   │
-│                   React + Vite + Three.js Web App                       │
+┌────────────────────────────────────────────────────────────────────────┐
+│                           CLIENT LAYER                                 │
+│                        React + Vite Web App                            │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐   │
-│  │ Audio       │  │ WebSocket   │  │ Three.js    │  │ UI State     │   │
-│  │ Capture     │  │ Manager     │  │ Avatar      │  │ Manager      │   │
-│  │ (Web Audio) │  │             │  │ (Marcus)    │  │              │   │
+│  │ Audio       │  │ WebSocket   │  │ AI Avatar   │  │ UI State     │   │
+│  │ Capture     │  │ Manager     │  │ (Marcus)    │  │ Manager      │   │
+│  │ (Web Audio) │  │             │  │             │  │              │   │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘   │
 └─────────┼────────────────┼────────────────┼────────────────┼───────────┘
           │                │                │                │
           │ PCM Audio      │ Binary/JSON    │ State Updates  │ Events
           │                │                │                │
           ▼                ▼                ▼                ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         TRANSPORT LAYER                                  │
+┌────────────────────────────────────────────────────────────────────────┐
+│                         TRANSPORT LAYER                                │
 │                    WebSocket (wss://api.salarydojo.com)                │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │  Message Types:                                                   │  │
+│  │  Message Types:                                                  │  │
 │  │  • audio_chunk (binary) - Raw PCM audio from client              │  │
 │  │  • transcript (json) - Real-time transcription updates           │  │
 │  │  • marcus_audio (binary) - TTS audio chunks                      │  │
 │  │  • state_update (json) - UI state changes                        │  │
-│  │  • event (json) - Visual/avatar triggers                          │  │
+│  │  • event (json) - Visual/avatar triggers                         │  │
 │  │  • control (json) - Session management                           │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────┘
           │
           ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          SERVER LAYER                                    │
+│                          SERVER LAYER                                   │
 │                     Python FastAPI Application                          │
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────┐    │
-│  │                    CONNECTION HANDLER                           │    │
-│  │  • Session creation/destruction                                 │    │
-│  │  • Message routing                                              │    │
-│  │  • Error handling                                               │    │
-│  └────────────────────────────────────────────────────────────────┘    │
-│           │                    │                      │                  │
-│           ▼                    ▼                      ▼                  │
-│  ┌──────────────┐    ┌──────────────┐    ┌───────────────────────┐     │
-│  │ Audio        │    │ Negotiation  │    │ Response              │     │
-│  │ Pipeline     │    │ Engine       │    │ Pipeline              │     │
-│  │              │    │              │    │                       │     │
-│  │ • STT        │───▶│ • State Mgmt │───▶│ • TTS                 │     │
-│  │ • VAD        │    │ • LLM        │    │ • Audio Streaming     │     │
-│  │ • Buffering  │    │ • Tools      │    │ • Interruption        │     │
-│  └──────────────┘    └──────────────┘    └───────────────────────┘     │
+│                                                                         │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │                    CONNECTION HANDLER                              │ │
+│  │  • Session creation/destruction                                    │ │
+│  │  • Message routing                                                 │ │
+│  │  • Error handling                                                  │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│           │                    │                      │                 │
+│           ▼                    ▼                      ▼                 │
+│  ┌──────────────┐    ┌──────────────┐    ┌───────────────────────┐      │
+│  │ Audio        │    │ Negotiation  │    │ Response              │      │
+│  │ Pipeline     │    │ Engine       │    │ Pipeline              │      │
+│  │              │    │              │    │                       │      │
+│  │ • STT        │───▶│ • State Mgmt │───▶│ • TTS                 │      │
+│  │ • VAD        │    │ • LLM        │    │ • Audio Streaming     │      │
+│  │ • Buffering  │    │ • Tools      │    │ • Interruption        │      │
+│  └──────────────┘    └──────────────┘    └───────────────────────┘      │
 │                              │                                          │
 │                              ▼                                          │
-│  ┌────────────────────────────────────────────────────────────────┐    │
-│  │                      SESSION STORE                              │    │
+│  ┌────────────────────────────────────────────────────────────────┐     │
+│  │                      SESSION STORE                             │    │
 │  │  In-Memory (dict[session_id, NegotiationSession])              │    │
 │  │  • Marcus state (budget, patience, stress, offers)             │    │
-│  │  • Conversation history                                         │    │
-│  │  • Candidate claims & verified facts                           │    │
+│  │  • Conversation history                                        │    │
+│  │  • Candidate claims & verified facts                            │    │
 │  └────────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────────┘
           │                              │
@@ -98,7 +98,7 @@ The Salary Dojo is a real-time voice-based negotiation training application wher
 
 ## 2. Component Design
 
-### 2.1 Client Application (React + Vite + Three.js)
+### 2.1 Client Application (React + Vite)
 
 #### 2.1.1 Audio Capture Module
 
@@ -156,7 +156,7 @@ interface NegotiationUIState {
   patience: number;            // 0-100, drives patience meter
   currentOffer: number | null;
   transcript: TranscriptEntry[];
-  marcusEmotion: 'neutral' | 'impressed' | 'skeptical' | 'stressed' | 'annoyed';
+  marcusEmotion: 'neutral' | 'impressed' | 'skeptical' | 'stressed';
 }
 
 interface TranscriptEntry {
@@ -173,40 +173,39 @@ interface TranscriptEntry {
 - Manage transcript display with real-time updates
 - Animate state transitions smoothly
 
-#### 2.1.4 Three.js Avatar Controller
+#### 2.1.4 Emoji Avatar Component
 
 ```typescript
-interface AvatarState {
-  emotion: 'neutral' | 'impressed' | 'skeptical' | 'stressed' | 'annoyed';
-  patience: number;              // 0-100, affects expression intensity
-  stress: number;                // 0-100, affects fidgeting/sweat
-  isSpeaking: boolean;           // Drives lip sync
-  isThinking: boolean;           // Drives "looking away" animation
-  audioLevel: number;            // For lip sync amplitude
+interface EmojiAvatarProps {
+  emotion: 'neutral' | 'impressed' | 'skeptical' | 'stressed';
+  isSpeaking: boolean;           // Drives pulsing animation
 }
 
-interface AvatarConfig {
-  model: 'stylized' | 'abstract' | 'realistic';
-  enableParticles: boolean;      // Sweat drops when stressed
-  enablePostProcessing: boolean; // Screen effects
-}
+const EMOTION_EMOJIS = {
+  neutral: '😐',
+  impressed: '😊',
+  very_impressed: '😄',
+  skeptical: '🤨',
+  stressed: '😰',
+  done: '😑'
+};
 ```
 
 **Responsibilities:**
-- Render 3D Marcus face/head using Three.js + React Three Fiber
-- Interpolate between emotional expression states
-- Drive lip sync based on TTS audio levels
-- Trigger particle effects (sweat, steam) at stress thresholds
-- Apply screen effects (vignette when patience low)
+- Display emoji based on Marcus's emotional state
+- Animate transitions between emotions (fade/scale)
+- Pulse or glow when Marcus is speaking
+- Simple CSS animations for visual feedback
 
 **Expression Mapping:**
-| Emotion | Eyebrows | Eyes | Mouth | Color Shift |
-|---------|----------|------|-------|-------------|
-| Neutral | Relaxed | Open | Slight smile | None |
-| Impressed | Raised | Wide | Full smile | Warm |
-| Skeptical | One raised | Narrowed | Tight | Cool |
-| Stressed | Furrowed | Darting | Tense | Red tint |
-| Annoyed | Furrowed | Narrowed | Frown | Dark |
+| Emotion | Emoji | Animation |
+|---------|-------|----------|
+| Neutral | 😐 | None |
+| Impressed | 😊 | Warm glow |
+| Very Impressed | 😄 | Bounce + glow |
+| Skeptical | 🤨 | Slight tilt |
+| Stressed | 😰 | Shake + red tint |
+| Done | 😑 | Fade to gray |
 
 ---
 

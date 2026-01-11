@@ -78,9 +78,8 @@ These scripts are designed to test Marcus's tool usage and state management. Use
 **Expected Marcus behavior**:
 - `adjust_internal_state` → skeptical (unrealistic claims)
 - `check_market_rate` for Meta/Google/Netflix new grad (~$135-145k reality)
-- `adjust_internal_state` → annoyed (rambling, wastes time)
+- `adjust_internal_state` → stressed (rambling, wastes time, pushy)
 - `make_offer` → $115k (lower than normal due to poor impression)
-- `adjust_internal_state` → stressed/frustrated (aggressive, dismissive)
 - Patience meter drops to critical
 - `adjust_internal_state` → done (lost patience)
 - `end_negotiation` → hung_up or rejected
@@ -112,7 +111,7 @@ These scripts are designed to test Marcus's tool usage and state management. Use
 - `adjust_internal_state` → neutral (nervous but polite)
 - Patience gradually decreases (rambling, indecisive)
 - `make_offer` → $120k standard
-- `adjust_internal_state` → slightly annoyed (overthinking, repetitive)
+- `adjust_internal_state` → stressed (overthinking, repetitive)
 - May end negotiation early if patience runs out
 - Or may close with standard offer if user eventually accepts
 
@@ -141,9 +140,8 @@ Based on these scripts, we need to tune:
 4. **Emotional state transitions**:
    - neutral → impressed (good argument, data)
    - neutral → skeptical (unverified claims)
-   - neutral → annoyed (rambling, >150 words)
-   - annoyed → frustrated (continued poor behavior)
-   - frustrated → done (patience < 20%)
+   - neutral → stressed (rambling, >150 words, aggressive behavior)
+   - stressed → done (patience < 20%)
 
 5. **Turn-taking**:
    - How long should Marcus's responses be?

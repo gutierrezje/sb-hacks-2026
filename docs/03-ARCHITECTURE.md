@@ -15,23 +15,23 @@ The Salary Dojo follows a **real-time event-driven architecture** with three pri
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              CLIENT TIER                                     │
-│                    React + Vite + Three.js Web App                          │
+│                         React + Vite Web App                                │
 │                                                                              │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
 │   │                        Presentation Layer                            │   │
 │   │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │   │
 │   │  │ Negotiation │  │ Marcus      │  │ Transcript  │  │ Results    │  │   │
-│   │  │ Screen      │  │ Avatar (3D) │  │ View        │  │ Screen     │  │   │
-│   │  └─────────────┘  └─────────────┘  └─────────────┘  └────────────┘  │   │
+│   │  │ Screen      │  │ Avatar      │  │ View        │  │ Screen     │  │   │
+│   │  │             │  │ (Emoji)     │  │             │  │            │  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                         │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
 │   │                         Service Layer                                │   │
 │   │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │   │
-│   │  │ AudioService    │  │ WebSocketService│  │ AvatarController    │  │   │
-│   │  │ • Web Audio API │  │ • Connection    │  │ • Expression blend  │  │   │
-│   │  │ • Playback      │  │ • Message queue │  │ • Lip sync          │  │   │
-│   │  │ • Level monitor │  │ • Reconnection  │  │ • Particle effects  │  │   │
+│   │  │ AudioService    │  │ WebSocketService│  │ EmojiController     │  │   │
+│   │  │ • Web Audio API │  │ • Connection    │  │ • Emotion display │  │   │
+│   │  │ • Playback      │  │ • Message queue │  │ • Animations      │  │   │
+│   │  │ • Level monitor │  │ • Reconnection  │  │ • Pulse effects   │  │   │
 │   │  └─────────────────┘  └─────────────────┘  └─────────────────────┘  │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                         │
@@ -122,14 +122,9 @@ App
 │   │   └── StartButton
 │   │
 │   ├── NegotiationPage
-│   │   ├── ThreeCanvas (React Three Fiber)
-│   │   │   ├── MarcusHead
-│   │   │   │   ├── FaceMesh (with morph targets)
-│   │   │   │   ├── EyeController
-│   │   │   │   └── MouthController (lip sync)
-│   │   │   ├── ParticleSystem (sweat/steam)
-│   │   │   ├── Lighting
-│   │   │   └── PostProcessing (vignette, color grade)
+│   │   ├── MarcusAvatar (Emoji Component)
+│   │   │   ├── EmotionDisplay
+│   │   │   └── PulseAnimation
 │   │   │
 │   │   ├── UIOverlay
 │   │   │   ├── PatienceMeter
@@ -198,16 +193,13 @@ interface NegotiationContextActions {
   resetSession: () => void;
 }
 
-// Avatar-specific state for Three.js
+// Avatar-specific state for emoji display
 interface AvatarState {
   targetEmotion: EmotionType;
-  currentEmotion: EmotionType;      // Interpolated
-  emotionBlend: number;              // 0-1, for smooth transitions
-  patience: number;
-  stress: number;
+  currentEmotion: EmotionType;      // For smooth transitions
+  emotionBlend: number;              // 0-1, for fade animations
   isSpeaking: boolean;
-  speechAmplitude: number;           // For lip sync
-  lookTarget: { x: number; y: number }; // Eye direction
+  isPulsing: boolean;                // Pulse effect when speaking
 }
 ```
 
@@ -264,7 +256,7 @@ backend/
 │
 └── config.py                   # Settings
 
-frontend/                        # React + Vite + Three.js
+frontend/                        # React + Vite
 ├── index.html
 ├── vite.config.ts
 ├── package.json
@@ -284,20 +276,13 @@ frontend/                        # React + Vite + Three.js
 │   │   │   ├── OfferDisplay.tsx
 │   │   │   └── StatusIndicator.tsx
 │   │   │
-│   │   └── three/
-│   │       ├── MarcusScene.tsx        # Main Three.js canvas
-│   │       ├── MarcusHead.tsx         # 3D head component
-│   │       ├── FaceController.tsx     # Expression/morph control
-│   │       ├── EyeController.tsx      # Eye tracking
-│   │       ├── LipSync.tsx            # Mouth animation
-│   │       ├── ParticleEffects.tsx    # Sweat, steam
-│   │       └── PostProcessing.tsx     # Screen effects
+│   │   └── emoji/
+│   │       └── MarcusAvatar.tsx      # Emoji avatar component
 │   │
 │   ├── hooks/
 │   │   ├── useWebSocket.ts
 │   │   ├── useAudioRecorder.ts
-│   │   ├── useAudioPlayer.ts
-│   │   └── useAvatar.ts              # Three.js state bridge
+│   │   └── useAudioPlayer.ts
 │   │
 │   ├── stores/
 │   │   └── negotiationStore.ts       # Zustand store
@@ -309,8 +294,7 @@ frontend/                        # React + Vite + Three.js
 │   │   └── index.ts
 │   │
 │   └── assets/
-│       └── models/
-│           └── marcus-head.glb       # 3D model with blend shapes
+│       └── images/
 ```
 
 #### 2.2.2 Dependency Graph

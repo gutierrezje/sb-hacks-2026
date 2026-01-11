@@ -11,9 +11,7 @@ class EmotionalState(str, Enum):
     IMPRESSED = "impressed"
     VERY_IMPRESSED = "very_impressed"
     SKEPTICAL = "skeptical"
-    ANNOYED = "annoyed"
     STRESSED = "stressed"
-    FRUSTRATED = "frustrated"
     DONE = "done"
 
 

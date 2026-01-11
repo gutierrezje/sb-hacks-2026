@@ -54,15 +54,8 @@ TOOL_SCHEMAS: List[Dict[str, Any]] = [
                     "description": (
                         "Change in patience (-20 to +10). "
                         "Negative for annoying behavior (rambling, unrealistic demands, rudeness). "
-                        "Positive for good responses (concise, data-driven, professional)."
-                    ),
-                },
-                "stress_delta": {
-                    "type": "number",
-                    "description": (
-                        "Change in stress level (-10 to +20). "
-                        "Positive for high demands or aggressive tactics. "
-                        "Negative for reasonable requests or accepting your offers."
+                        "Positive for good responses (concise, data-driven, professional). "
+                        "Patience starts at 100 and ends negotiation if it drops below 20."
                     ),
                 },
                 "emotional_state": {
@@ -72,16 +65,14 @@ TOOL_SCHEMAS: List[Dict[str, Any]] = [
                         "impressed",
                         "very_impressed",
                         "skeptical",
-                        "annoyed",
                         "stressed",
-                        "frustrated",
                         "done",
                     ],
                     "description": (
                         "Your current emotional state: "
                         "neutral (default), impressed (good arguments/data), very_impressed (excellent moves), "
-                        "skeptical (unverified claims), annoyed (rambling/repetition), "
-                        "stressed (aggressive tactics), frustrated (patience running low), done (about to hang up)"
+                        "skeptical (unverified claims), "
+                        "stressed (patience running low or aggressive tactics), done (about to hang up)"
                     ),
                 },
                 "reason": {
